@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Attention Meter | 8‑Question Focus Assessment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e0eafc 0%, #cfdef3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 1.5rem;
+        }
+
+        /* main card container */
+        .attention-card {
+            max-width: 950px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 3rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* header area with dynamic meter */
+        .meter-header {
+            background: #1f2b3c;
+            padding: 1.5rem 2rem 1.8rem 2rem;
+            color: white;
+            text-align: center;
+        }
+
+        .meter-header h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .meter-header h1 span {
+            background: #ffd966;
+            padding: 0.2rem 0.8rem;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1e2a3a;
+        }
+
+        .meter-gauge-area {
+            margin-top: 1.2rem;
+            background: #0f1720;
+            border-radius: 80px;
+            padding: 0.4rem 0.6rem;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .meter-bar-bg {
+            background: #2d3e4e;
+            border-radius: 60px;
+            height: 32px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .meter-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #3ccf91, #27ae60, #f4d03f, #e67e22, #e74c3c);
+            border-radius: 60px;
+            transition: width 0.55s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 0 8px rgba(60, 207, 145, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .score-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.8rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            background: #0a1118;
+            padding: 0.5rem 1rem;
+            border-radius: 60px;
+        }
+
+        .attention-label {
+            background: #ffd96622;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            color: #f7d44a;
+        }
+
+        /* question section */
+        .questions-container {
+            padding: 1.8rem 2rem 2rem 2rem;
+        }
+
+        .question-item {
+            background: #ffffffdd;
+            backdrop-filter: blur(4px);
+            border-radius: 2rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,240,0.6);
+        }
+
+        .question-text {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1e2f3e;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .q-num {
+            background: #2c3e50;
+            color: white;
+            border-radius: 40px;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .rating-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .rating-btn {
+            background: #f0f3f8;
+            border: none;
+            padding: 0.5rem 1.1rem;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.15s;
+            color: #1f2b3c;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .rating-btn:hover {
+            background: #e2e8f2;
+            transform: scale(0.97);
+        }
+
+        .rating-btn.active {
+            background: #2c6e9e;
+            color: white;
+            box-shadow: 0 4px 10px rgba(44,110,158,0.3);
+        }
+
+        /* score legend */
+        .score-legend {
+            background: #eef2fa;
+            border-radius: 2rem;
+            padding: 0.8rem 1.5rem;
+            margin: 1rem 0 1.2rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 500;
+            gap: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 12px;
+            border-radius: 20px;
+        }
+
+        .reset-btn {
+            background: #2c3e50;
+            border: none;
+            padding: 0.9rem 1.8rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: white;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+        }
+
+        .reset-btn:hover {
+            background: #1e2f3f;
+            transform: translateY(-2px);
+        }
+
+        .feedback-message {
+            text-align: center;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            color: #2c6e2f;
+            font-weight: 500;
+            background: #e9f5e9;
+            padding: 0.5rem;
+            border-radius: 50px;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 1rem 0 1.2rem;
+            color: #5a6874;
+            border-top: 1px solid #dce5f0;
+            background: #f9fbfe;
+        }
+
+        @media (max-width: 640px) {
+            .questions-container {
+                padding: 1.2rem;
+            }
+            .question-item {
+                padding: 0.8rem 1rem;
+            }
+            .rating-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+            .meter-header h1 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="attention-card">
+    <div class="meter-header">
+        <h1>
+            🧠 Attention Meter
+            <span>8‑question focus scan</span>
+        </h1>
+        <div class="meter-gauge-area">
+            <div class="meter-bar-bg">
+                <div class="meter-fill" id="meterFill">0%</div>
+            </div>
+            <div class="score-stats">
+                <span>🎯 Focus index</span>
+                <span id="scoreValue" class="attention-label">0 / 40</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="questions-container" id="questionsArea">
+        <!-- 8 questions injected dynamically with JS -->
+    </div>
+
+    <div style="padding: 0 2rem 0.5rem 2rem;">
+        <div class="score-legend">
+            <div class="legend-item"><div class="legend-color" style="background:#3ccf91;"></div> <span>32–40 : Laser focus 🚀</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#f4d03f;"></div> <span>24–31 : Moderate attention ⚡</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#e67e22;"></div> <span>16–23 : Distractible 🌫️</span></div>
+            <div class="legend-item"><div class="legend-color" style="background:#e74c3c;"></div> <span>0–15 : High fatigue 🧘</span></div>
+        </div>
+        <button class="reset-btn" id="resetAllBtn">⟳ Reset all answers</button>
+        <div id="feedbackMsg" class="feedback-message">⭐ Select a rating (1–5) for each question to measure attention.</div>
+    </div>
+    <footer>
+        ⚡ 8 key attention indicators | Each rated 1 (low focus) to 5 (intense focus)
+    </footer>
+</div>
+
+<script>
+    // ---------- 8 questions related to attention & focus ----------
+    const QUESTIONS = [
+        "I can easily ignore distractions around me while working/studying.",
+        "My mind rarely wanders to unrelated thoughts during a task.",
+        "I stay fully engaged even with repetitive or detailed work.",
+        "I notice small errors or changes in the environment without losing focus.",
+        "I can sustain mental energy on a single activity for over 20 minutes.",
+        "External notifications or noises don't break my concentration.",
+        "I feel mentally sharp and alert right now.",
+        "I can quickly refocus after a minor interruption."
+    ];
+
+    // Each question stored with rating (1..5). Default = null (unanswered)
+    let ratings = new Array(8).fill(null);
+
+    // DOM elements
+    const questionsContainer = document.getElementById('questionsArea');
+    const meterFillEl = document.getElementById('meterFill');
+    const scoreValueSpan = document.getElementById('scoreValue');
+    const resetBtn = document.getElementById('resetAllBtn');
+    const feedbackMsgDiv = document.getElementById('feedbackMsg');
+
+    // Helper: compute total score (sum of ratings where not null)
+    function computeTotalScore() {
+        let sum = 0;
+        let answeredCount = 0;
+        for (let i = 0; i < ratings.length; i++) {
+            if (ratings[i] !== null) {
+                sum += ratings[i];
+                answeredCount++;
+            }
+        }
+        return { total: sum, answered: answeredCount };
+    }
+
+    // Maximum possible = 8 * 5 = 40. Show percentage based on answered OR full scale.
+    // We'll display percentage = (currentScore / 40) * 100, and show score as "X / 40"
+    function updateMeterAndUI() {
+        const { total, answered } = computeTotalScore();
+        const maxPossible = 40;
+        const percent = (total / maxPossible) * 100;
+        const fillPercent = Math.min(100, percent);
+        meterFillEl.style.width = `${fillPercent}%`;
+        // show text inside bar if width > 12%
+        if (fillPercent > 12) {
+            meterFillEl.textContent = `${Math.floor(fillPercent)}%`;
+        } else {
+            meterFillEl.textContent = '';
+        }
+        scoreValueSpan.textContent = `${total} / 40`;
+
+        // update dynamic attention label based on total
+        let attentionMessage = '';
+        if (total >= 32) attentionMessage = '🔥 Extraordinary attention!';
+        else if (total >= 24) attentionMessage = '⚡ Good focus, keep it steady.';
+        else if (total >= 16) attentionMessage = '🌫️ Moderate distraction — try a focus technique.';
+        else attentionMessage = '🧘 Low attention — take a mindful break.';
+
+        if (answered === 8) {
+            feedbackMsgDiv.innerHTML = `📊 ${attentionMessage} &nbsp;|&nbsp; Score ${total}/40 · ${Math.floor(fillPercent)}% attention level.`;
+        } else {
+            feedbackMsgDiv.innerHTML = `✏️ ${8 - answered} question(s) left. Rate each from 1 (low) to 5 (high focus). Current total: ${total}/40.`;
+        }
+
+        // extra color nuance on bar can be adjusted via gradient but fine.
+    }
+
+    // render all questions with current rating active states
+    function renderQuestions() {
+        if (!questionsContainer) return;
+        questionsContainer.innerHTML = '';
+        for (let i = 0; i < QUESTIONS.length; i++) {
+            const qText = QUESTIONS[i];
+            const currentRating = ratings[i];
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-item';
+            questionDiv.setAttribute('data-qid', i);
+            
+            // question text with number
+            const textWrapper = document.createElement('div');
+            textWrapper.className = 'question-text';
+            textWrapper.innerHTML = `<span class="q-num">${i+1}</span> <span>${qText}</span>`;
+            
+            const ratingGroup = document.createElement('div');
+            ratingGroup.className = 'rating-buttons';
+            
+            // create 5 rating buttons (1 to 5)
+            for (let val = 1; val <= 5; val++) {
+                const btn = document.createElement('button');
+                btn.className = 'rating-btn';
+                if (currentRating === val) btn.classList.add('active');
+                btn.textContent = `${val} – ${getRatingLabel(val)}`;
+                btn.setAttribute('data-value', val);
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    setRatingForQuestion(i, val);
+                });
+                ratingGroup.appendChild(btn);
+            }
+            
+            questionDiv.appendChild(textWrapper);
+            questionDiv.appendChild(ratingGroup);
+            questionsContainer.appendChild(questionDiv);
+        }
+    }
+    
+    // small helper for rating text (clean)
+    function getRatingLabel(val) {
+        switch(val) {
+            case 1: return "poor";
+            case 2: return "low";
+            case 3: return "moderate";
+            case 4: return "good";
+            case 5: return "intense";
+            default: return "";
+        }
+    }
+    
+    // set rating for a specific question, re-render + update meter
+    function setRatingForQuestion(qIndex, newValue) {
+        if (ratings[qIndex] === newValue) {
+            // optional: if same value, no change but we could keep it
+            return;
+        }
+        ratings[qIndex] = newValue;
+        // re-render to update active class visual
+        renderQuestions();
+        updateMeterAndUI();
+        // optional: store in localStorage? but not needed
+    }
+    
+    // reset all ratings to null
+    function resetAllRatings() {
+        for (let i = 0; i < ratings.length; i++) {
+            ratings[i] = null;
+        }
+        renderQuestions();
+        updateMeterAndUI();
+        // extra feedback
+        feedbackMsgDiv.innerHTML = '✨ All answers cleared. Rate each question to see your attention meter.';
+        setTimeout(() => {
+            const { answered } = computeTotalScore();
+            if (answered === 0) {
+                // keep friendly reminder
+            } else {
+                updateMeterAndUI();
+            }
+        }, 30);
+    }
+    
+    // optional: highlight incomplete questions, but we already show in feedback.
+    // To provide better UX: auto smooth scroll? not needed
+    
+    // additional initial check: load any previously saved? not needed.
+    // Bonus: if all questions get rated, show confetti-like effect? Not required but adds delight.
+    function checkAllAnsweredCelebration() {
+        const { answered } = computeTotalScore();
+        if (answered === 8) {
+            // show gentle "complete" message via feedback updateMeterAndUI already includes style
+            const currentTotal = computeTotalScore().total;
+            if (currentTotal >= 35) {
+                feedbackMsgDiv.style.background = "#d9ffea";
+                feedbackMsgDiv.style.transition = "0.2s";
+                setTimeout(() => {
+                    if (computeTotalScore().answered === 8) feedbackMsgDiv.style.background = "#e9f5e9";
+                }, 800);
+            } else {
+                feedbackMsgDiv.style.background = "#fff2df";
+                setTimeout(() => {
+                    if (computeTotalScore().answered === 8) feedbackMsgDiv.style.background = "#e9f5e9";
+                }, 700);
+            }
+        } else {
+            feedbackMsgDiv.style.background = "#e9f5e9";
+        }
+    }
+    
+    // override updateMeterAndUI to also call celebration check
+    const originalUpdate = updateMeterAndUI;
+    window.updateMeterAndUI = function() {
+        originalUpdate();
+        checkAllAnsweredCelebration();
+    };
+    updateMeterAndUI = window.updateMeterAndUI;
+    
+    // rebind to ensure everything uses new function
+    function finalUIBridge() {
+        updateMeterAndUI();
+    }
+    
+    // make setRating use updated updateMeterAndUI + re-render
+    const originalSetRating = setRatingForQuestion;
+    window.setRatingForQuestion = function(idx, val) {
+        originalSetRating(idx, val);
+        finalUIBridge();
+    };
+    setRatingForQuestion = window.setRatingForQuestion;
+    
+    // final render function redefined to keep consistency
+    const originalRender = renderQuestions;
+    function enhancedRender() {
+        originalRender();
+        // after rendering, reattach any missing active highlights are already inside originalRender but we update anyway
+    }
+    renderQuestions = enhancedRender.bind(this);
+    
+    // manual reassign to ensure global context
+    window.ratings = ratings;
+    
+    // attach reset event
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            resetAllRatings();
+        });
+    }
+    
+    // initial render
+    renderQuestions();
+    updateMeterAndUI();
+    
+    // additional dynamic: for each rating, if all 8 answered we log but that's fine.
+    // add hover effect to meter? subtle.
+    const meterFill = document.getElementById('meterFill');
+    if (meterFill) {
+        meterFill.addEventListener('mouseenter', () => {
+            const { total } = computeTotalScore();
+            const percent = (total / 40) * 100;
+            meterFill.setAttribute('title', `Attention score ${total}/40 · ${Math.floor(percent)}%`);
+        });
+    }
+    
+    // Also ensure if all questions answered, the meter shows celebratory message.
+    function syncAfterAnyChange() {
+        const answeredCount = ratings.filter(r => r !== null).length;
+        if (answeredCount === 8) {
+            const totalScore = ratings.reduce((acc, r) => acc + (r || 0), 0);
+            if (totalScore >= 35) {
+                feedbackMsgDiv.innerHTML = `🏆 AMAZING! Attention Score ${totalScore}/40 – peak cognitive engagement! 🧠✨`;
+            } else if (totalScore >= 28) {
+                feedbackMsgDiv.innerHTML = `🎯 Strong attention! Score ${totalScore}/40. Keep minimizing distractions.`;
+            } else if (totalScore >= 20) {
+                feedbackMsgDiv.innerHTML = `📘 Moderate zone: ${totalScore}/40. Try the Pomodoro technique to boost.`;
+            } else {
+                feedbackMsgDiv.innerHTML = `🌱 Recharge needed. Score ${totalScore}/40. Take a short walk or rest.`;
+            }
+        } else {
+            const left = 8 - answeredCount;
+            const { total } = computeTotalScore();
+            feedbackMsgDiv.innerHTML = `📝 ${left} more question(s) to answer. Current score ${total}/40. Tap ratings to build your attention profile.`;
+        }
+    }
+    
+    // override update function to call syncAfterAnyChange as well
+    const superUpdate = updateMeterAndUI;
+    updateMeterAndUI = function() {
+        superUpdate();
+        syncAfterAnyChange();
+    };
+    
+    // re-run final binding after initial load to sync
+    setTimeout(() => {
+        updateMeterAndUI();
+        // for safety: if any rating null, fine.
+    }, 10);
+    
+    // fix to ensure the meterFill text after width recalc.
+    function finalFixMeterText() {
+        const fill = document.getElementById('meterFill');
+        if (fill) {
+            const width = parseFloat(fill.style.width);
+            if (width > 12) {
+                const { total } = computeTotalScore();
+                const percent = (total / 40) * 100;
+                fill.textContent = `${Math.floor(percent)}%`;
+            } else {
+                fill.textContent = '';
+            }
+        }
+    }
+    
+    const origUpdateMeter = updateMeterAndUI;
+    updateMeterAndUI = function() {
+        origUpdateMeter();
+        finalFixMeterText();
+    };
+    updateMeterAndUI();
+    
+    // also attach to reset:
+    const originalReset = resetAllRatings;
+    resetAllRatings = function() {
+        originalReset();
+        finalFixMeterText();
+        syncAfterAnyChange();
+    };
+    window.resetAllRatings = resetAllRatings;
+    if (resetBtn) {
+        resetBtn.onclick = (e) => {
+            e.preventDefault();
+            resetAllRatings();
+        };
+    }
+    
+    // make all setRating work with final fix
+    const newSetRating = function(idx, val) {
+        if (ratings[idx] === val) return;
+        ratings[idx] = val;
+        renderQuestions();
+        updateMeterAndUI();
+        finalFixMeterText();
+        syncAfterAnyChange();
+    };
+    window.setRatingForQuestion = newSetRating;
+    setRatingForQuestion = newSetRating;
+    
+    // rebind question buttons: re-render uses new closure, but event listeners inside renderQuestions currently reference old setRating? need to override global.
+    // Since renderQuestions uses setRatingForQuestion defined in its closure, we replace the function globally so that all generated buttons use latest version.
+    // Force re-render with latest handler:
+    function finalRenderWithNewBinding() {
+        if (!questionsContainer) return;
+        questionsContainer.innerHTML = '';
+        for (let i = 0; i < QUESTIONS.length; i++) {
+            const qText = QUESTIONS[i];
+            const currentRating = ratings[i];
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-item';
+            const textWrapper = document.createElement('div');
+            textWrapper.className = 'question-text';
+            textWrapper.innerHTML = `<span class="q-num">${i+1}</span> <span>${qText}</span>`;
+            const ratingGroup = document.createElement('div');
+            ratingGroup.className = 'rating-buttons';
+            for (let val = 1; val <= 5; val++) {
+                const btn = document.createElement('button');
+                btn.className = 'rating-btn';
+                if (currentRating === val) btn.classList.add('active');
+                btn.textContent = `${val} – ${getRatingLabel(val)}`;
+                btn.setAttribute('data-value', val);
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    setRatingForQuestion(i, val);
+                });
+                ratingGroup.appendChild(btn);
+            }
+            questionDiv.appendChild(textWrapper);
+            questionDiv.appendChild(ratingGroup);
+            questionsContainer.appendChild(questionDiv);
+        }
+    }
+    
+    // replace render function globally:
+    renderQuestions = finalRenderWithNewBinding;
+    renderQuestions();
+    updateMeterAndUI();
+</script>
+</body>
+  </html>
